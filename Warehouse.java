@@ -13,6 +13,7 @@ public class Warehouse implements Serializable
     private Waitlist waitlist;
 	private Wishlist wishlist;
     private ClientIdServer clientIdServer;
+	private ProductIdServer productIdServer;
     private InvoiceIdServer invoiceIdServer;
     private OrderIdServer orderIdServer;
 
@@ -25,6 +26,7 @@ public class Warehouse implements Serializable
         waitlist = Waitlist.instance();
 		wishlist = Wishlist.instance();
         clientIdServer = ClientIdServer.instance();
+		productIdServer = ProductIdServer.instance();
         invoiceIdServer = InvoiceIdServer.instance();
         orderIdServer = OrderIdServer.instance();
     }
@@ -67,6 +69,7 @@ public class Warehouse implements Serializable
         ObjectOutputStream output = new ObjectOutputStream(file);
         output.writeObject(Warehouse.instance());
         output.writeObject(ClientIdServer.instance());
+		output.writeObject(ProductIdServer.instance());
         output.writeObject(InvoiceIdServer.instance());
         output.writeObject(InvoiceList.instance());
         output.writeObject(OrderIdServer.instance());
@@ -135,7 +138,6 @@ public class Warehouse implements Serializable
     public Product addProduct(String name, int quantity, double price) 
 	{
         Product product = new Product(name, quantity, price);
-
         if (ProductList.instance().insertProduct(product))
 		{
             return product;
@@ -210,6 +212,12 @@ public class Warehouse implements Serializable
 
         return p;
     }
+	
+	public Client searchClientship(String id) 
+	{
+    return clientList.search(id);
+	}
+
 
     public Iterator<Client> getClients() 
 	{

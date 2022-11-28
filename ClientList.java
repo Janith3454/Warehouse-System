@@ -18,6 +18,20 @@ public class ClientList implements Serializable
             return clientList;
         }
     }
+	
+	public Client search(String clientId) 
+	{
+    for (Iterator iterator = clients.iterator(); iterator.hasNext(); ) 
+	{
+      Client client = (Client) iterator.next();
+      if (client.getClientId().equals(clientId)) 
+	  {
+        return client;
+      }
+    }
+    return null;
+	}
+
 
     public boolean insertClient(Client client) 
 	{
