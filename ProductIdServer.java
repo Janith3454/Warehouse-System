@@ -1,51 +1,77 @@
 import java.io.*;
-public class ProductIdServer implements Serializable {
+public class ProductIdServer implements Serializable 
+{
   private static final long serialVersionUID = 1L;
   private  int idCounter;
   private static ProductIdServer server;
-  private ProductIdServer() {
+  
+  private ProductIdServer() 
+  {
     idCounter = 0;
   }
-  public static ProductIdServer instance() {
-    if (server == null) {
+  
+  public static ProductIdServer instance() 
+  {
+    if (server == null) 
+	{
       return (server = new ProductIdServer());
     } else {
       return server;
     }
   }
-  public String generateId() {
+  
+  public String generateId() 
+  {
     idCounter++;
     return "P" + idCounter;
   }
-  public String toString() {
+  
+  public String toString() 
+  {
     return ("IdServer" + idCounter);
   }
-  public static void retrieve(ObjectInputStream input) {
-    try {
+  
+  public static void retrieve(ObjectInputStream input) 
+  {
+    try 
+	{
       server = (ProductIdServer) input.readObject();
-    } catch(IOException ioe) {
+    } catch(IOException ioe) 
+	{
       ioe.printStackTrace();
-    } catch(Exception cnfe) {
+    } catch(Exception cnfe) 
+	{
       cnfe.printStackTrace();
     }
   }
-  private void writeObject(java.io.ObjectOutputStream output) throws IOException {
-    try {
+  
+  private void writeObject(java.io.ObjectOutputStream output) throws IOException 
+  {
+    try 
+	{
       output.defaultWriteObject();
       output.writeObject(server);
-    } catch(IOException ioe) {
+    } 
+	catch(IOException ioe) 
+	{
       ioe.printStackTrace();
     }
   }
-  private void readObject(java.io.ObjectInputStream input) throws IOException, ClassNotFoundException {
-    try {
+  
+  private void readObject(java.io.ObjectInputStream input) throws IOException, ClassNotFoundException 
+  {
+    try 
+	{
       input.defaultReadObject();
-      if (server == null) {
+      if (server == null) 
+	  {
         server = (ProductIdServer) input.readObject();
       } else {
         input.readObject();
       }
-    } catch(IOException ioe) {
+    } 
+	catch(IOException ioe) 
+	{
       ioe.printStackTrace();
     }
   }
