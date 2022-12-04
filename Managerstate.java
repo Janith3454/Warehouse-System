@@ -1,23 +1,28 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
-public class Managerstate extends WareState 
+import java.util.List;
+
+public class Managerstate extends WareState implements ActionListener 
 {
   private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
   private static Warehouse warehouse;
   private UserInterface context;
   private static Managerstate instance;
   private static final int EXIT = 0;
-  private static final int ADD_PRODUCTS = 2;
-  private static final int CLERKMENU = 24;
-  private static final int RECEIVE_SHIPMENT = 20;
-  private static final int HELP = 25;
+  private static final int HELP = 4;
   
   private Managerstate() 
   {
       super();
       warehouse = Warehouse.instance();
   }
+  
+  private JFrame frame;
+  private AbstractButton addproductsBtn, clerkmenuBtn, recieveShipmentBtn, logoutBtn;
 
   public static Managerstate instance() 
   {
@@ -26,6 +31,25 @@ public class Managerstate extends WareState
       instance = new Managerstate();
     }
     return instance;
+  }
+  
+  public void actionPerformed(ActionEvent event) 
+   {
+      if (event.getSource().equals(this.addproductsBtn))
+        this.addProducts();
+      else if (event.getSource().equals(this.clerkmenuBtn))
+        this.clerkmenu(); 
+      else if (event.getSource().equals(this.recieveShipmentBtn))
+        this.recieveShipment();        
+      else if (event.getSource().equals(this.logoutBtn))
+        this.logout();
+   }
+	
+  public void clear() 
+  { 
+    // clean up stuff
+    frame.getContentPane().removeAll();
+    frame.paint(frame.getGraphics());
   }
 
   public String getToken(String prompt) 
@@ -103,17 +127,6 @@ public class Managerstate extends WareState
         System.out.println("Enter a number");
       }
     } while (true);
-  }
-
-  public void help() 
-  {
-	System.out.println("Successfully loaded into the MANAGER STATE");  
-    System.out.println("Enter a number between 0 and 12 as explained below:");
-    System.out.println(EXIT + " to Exit\n");
-    System.out.println(ADD_PRODUCTS + " to add products");
-    System.out.println(RECEIVE_SHIPMENT + " to receive a shipment");
-	System.out.println(CLERKMENU + " to become a salesclerk");
-    System.out.println(HELP + " for help");
   }
 
   public void addProducts() 
@@ -203,30 +216,27 @@ public class Managerstate extends WareState
     (UserInterface.instance()).changeState(1);
   }
 	
- 
-  public void process() 
+   public void run() 
   {
-    int command;
-    help();
-    while ((command = getCommand()) != EXIT) 
-	{
-      switch (command) 
-	  {
-        case ADD_PRODUCTS:          	addProducts();
-										break;
-        case RECEIVE_SHIPMENT:			recieveShipment();        
-										break;
-		case CLERKMENU:					clerkmenu();
-										break;
-        case HELP:						help();
-										break;
-
-      }
-    }
-    logout();
-  }
-  public void run() 
-  {
-    process();
+    frame = UserInterface.instance().getFrame();
+    frame.getContentPane().removeAll();
+    frame.getContentPane().setLayout(new FlowLayout());
+    addproductsBtn = new JButton("Add products");
+    clerkmenuBtn = new JButton("Change to |SALESCLERK STATE|");
+    recieveShipmentBtn = new JButton("Receive a shipment");
+	logoutBtn = new JButton("Log out");
+    addproductsBtn.addActionListener(this);
+    clerkmenuBtn.addActionListener(this);
+    recieveShipmentBtn.addActionListener(this);
+	logoutBtn.addActionListener(this);
+    frame.getContentPane().add(this.addproductsBtn);
+    frame.getContentPane().add(this.clerkmenuBtn);
+    frame.getContentPane().add(this.recieveShipmentBtn);
+	frame.getContentPane().add(this.logoutBtn);
+    frame.setVisible(true);
+    frame.paint(frame.getGraphics());
+    // frame.repaint();
+    frame.toFront();
+    frame.requestFocus();
   }
 }
