@@ -3,5 +3,5 @@ A warehouse system that allows users to conduct basic warehouse operations. The 
 
 Run the following commands to run the warehouse system.
 
-• javac UserInterface.java
-• java UserInterface.java
+1. javac UserInterface.java
+2. java UserInterface.java
