@@ -1,26 +1,26 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
-public class Clientstate extends WareState 
+
+public class Clientstate extends WareState implements ActionListener
 {
   private static Clientstate clientstate;
   private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
   private static Warehouse warehouse;
   private static final int EXIT = 0;
-  private static final int SHOW_CLIENTS = 3;
-  private static final int SHOW_PRODUCTS = 4;
-  private static final int SHOW_TRANSACTIONS = 18;
-  private static final int ADD_TO_CART = 5;
-  private static final int DISPLAY_CART = 6;
-  private static final int EMPTY_CART = 7;
-  private static final int PLACE_ORDER = 8;
-  private static final int SHOW_WAITLIST = 13;
-  private static final int HELP = 25;
+  private static final int HELP = 7;
   
   private Clientstate() 
   {
     warehouse = Warehouse.instance();
   }
+  
+  private JFrame frame;
+  private AbstractButton showclientsBtn, showproductsBtn, showtransBtn, modifyShoppingBtn,
+  placeorderBtn, showWaitlistBtn, logoutBtn;
 
   public static Clientstate instance() 
   {
@@ -32,6 +32,31 @@ public class Clientstate extends WareState
 	{
       return clientstate;
     }
+  }
+  
+   public void actionPerformed(ActionEvent event) 
+   {
+      if (event.getSource().equals(this.showclientsBtn))
+        this.showClients();
+      else if (event.getSource().equals(this.showproductsBtn))
+        this.showProducts(); 
+      else if (event.getSource().equals(this.showtransBtn))
+        this.showTransactions();
+      else if (event.getSource().equals(this.modifyShoppingBtn))
+        this.modifyShoppingCart();
+	  else if (event.getSource().equals(this.placeorderBtn))
+        this.placeOrder(); 
+      else if (event.getSource().equals(this.showWaitlistBtn))
+        this.showWaitlist();
+      else if (event.getSource().equals(this.logoutBtn))
+        this.logout();
+   }
+	
+  public void clear() 
+  { 
+    // clean up stuff
+    frame.getContentPane().removeAll();
+    frame.paint(frame.getGraphics());
   }
   
   public String getToken(String prompt) 
@@ -97,22 +122,11 @@ public class Clientstate extends WareState
       }
     } while (true);
   }
+  
+   public void modifyShoppingCart() {
+        (UserInterface.instance()).changeState(4);
+    }
 
-  public void help() 
-  {
-	System.out.println("Successfully loaded into the CLIENT STATE");  
-    System.out.println("Enter a number between 0 and 24 as explained below:");	
-    System.out.println(EXIT + " to Exit\n");
-    System.out.println(SHOW_CLIENTS + " to print clients");
-    System.out.println(SHOW_PRODUCTS + " to print products");
-    System.out.println(SHOW_TRANSACTIONS + " to display a list of a client's transactions");
-    System.out.println(ADD_TO_CART + " to add product to the shopping cart");
-	System.out.println(DISPLAY_CART + " to display client's shopping cart");
-	System.out.println(EMPTY_CART + " to empty client's shopping cart");
-	System.out.println(SHOW_WAITLIST + " to display the waitlist");
-	System.out.println(PLACE_ORDER + " to place an order");
-    System.out.println(HELP + " for help");
-  }
 
   public void showClients() 
   {
@@ -148,87 +162,6 @@ public class Clientstate extends WareState
         System.out.println(transactions.next().toString());
     }
     } 
-	else 
-	{
-      System.out.println("Could not find that client id");
-    }
-  }
-  
-  
-  public void addToCart() 
-  {
-    Client client;
-    Product product;
-    String clientId = getToken("Enter client id to add to their shopping cart");
-    client = warehouse.getClientById(clientId);
-    if (client != null) 
-	{
-      System.out.println("Client found:");
-      System.out.println(client);
-      do 
-	  {
-        String productId = getToken("Enter product id");
-        product = warehouse.getProductById(productId);
-        if(product != null) 
-		{
-          System.out.println("Product found:");
-          System.out.println(product);
-          int productQuantity = getNumber("Enter enter quantity");
-          warehouse.addToCart(clientId, product, productQuantity);
-        } else 
-		{
-          System.out.println("Could not find that product id");
-        }
-        if (!yesOrNo("Add another product to the shopping cart?")) 
-		{
-          break;
-        }
-      } 
-	  while (true);
-    } 
-	else 
-	{
-      System.out.println("Could not find that client id");
-    }
-  }
-
-  public void displayCart() 
-  {
-    Client client;
-    String clientId = getToken("Enter client id to view to their shopping cart");
-    client = warehouse.getClientById(clientId);
-    if (client != null) 
-	{
-      System.out.println("Client found:");
-      System.out.println(client);
-      System.out.println("Shopping Cart:");
-      warehouse.displayCart(clientId);
-    } 
-	else 
-	{
-      System.out.println("Could not find that client id");
-    }
-  }
-
-  public void emptyCart() 
-  {
-    Client client;
-    String clientId = getToken("Enter client id to empty to their shopping cart");
-    client = warehouse.getClientById(clientId);
-    if (client != null) 
-	{
-      System.out.println("Client found:");
-      System.out.println(client);
-      if(yesOrNo("Are you sure you wish to empty the shopping cart?")) 
-	  {
-        warehouse.emptyCart(clientId);
-        System.out.println("Shopping Cart has been emptied");
-      } 
-	  else 
-	  {
-        System.out.println("Cancelled, shopping cart was not emptied");
-      }
-    }
 	else 
 	{
       System.out.println("Could not find that client id");
@@ -318,8 +251,7 @@ public class Clientstate extends WareState
     }
   }
 
-
-    public void showWaitlist() 
+  public void showWaitlist() 
   {
     Iterator<WaitItem> waitlist = warehouse.getWaitlist();
     while (waitlist.hasNext())
@@ -329,42 +261,6 @@ public class Clientstate extends WareState
     }
   }
   
-
-
-  public void process() 
-  {
-    int command;
-    help();
-    while ((command = getCommand()) != EXIT) 
-	{
-      switch (command) { 
-        case SHOW_CLIENTS:				showClients();        
-										break;
-        case SHOW_PRODUCTS:				showProducts(); 
-										break;									
-		case SHOW_TRANSACTIONS:			showTransactions();   
-										break;								
-		case ADD_TO_CART:				addToCart();
-										break;   
-		case DISPLAY_CART:				displayCart();
-										break;
-		case EMPTY_CART:				emptyCart();          
-										break;
-		case PLACE_ORDER:				placeOrder();         
-										break;
-		case SHOW_WAITLIST:				showWaitlist();        
-										break;			
-        case HELP:              		help();
-										break;
-      }
-    }
-    logout();
-  }
-
-  public void run() 
-  {
-    process();
-  }
 
   public void logout()
   {
@@ -382,6 +278,39 @@ public class Clientstate extends WareState
        }
     else 
        (UserInterface.instance()).changeState(3); // exit code 2, indicates error
+  }
+  
+  public void run() 
+  {
+    frame = UserInterface.instance().getFrame();
+    frame.getContentPane().removeAll();
+    frame.getContentPane().setLayout(new FlowLayout());
+    showclientsBtn = new JButton("Show Clients");
+    showproductsBtn = new JButton("Show Products");
+    showtransBtn = new JButton("Display a list of a client's transactions");
+    modifyShoppingBtn = new JButton("Change to |MODIFY SHOPPINGCART STATE|");
+	placeorderBtn = new JButton("Place an order");
+	showWaitlistBtn = new JButton("Display the waitlist");
+	logoutBtn = new JButton("Log out");
+    showclientsBtn.addActionListener(this);
+    showproductsBtn.addActionListener(this);
+    showtransBtn.addActionListener(this);
+    modifyShoppingBtn.addActionListener(this);
+	placeorderBtn.addActionListener(this);
+	showWaitlistBtn.addActionListener(this);
+	logoutBtn.addActionListener(this);
+    frame.getContentPane().add(this.showclientsBtn);
+    frame.getContentPane().add(this.showproductsBtn);
+    frame.getContentPane().add(this.showtransBtn);
+    frame.getContentPane().add(this.modifyShoppingBtn);
+	frame.getContentPane().add(this.placeorderBtn);
+	frame.getContentPane().add(this.showWaitlistBtn);
+	frame.getContentPane().add(this.logoutBtn);
+    frame.setVisible(true);
+    frame.paint(frame.getGraphics());
+    // frame.repaint();
+    frame.toFront();
+    frame.requestFocus();
   }
  
 }

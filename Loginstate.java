@@ -1,110 +1,135 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
-public class Loginstate extends WareState{
-  private static final int CLERK_LOGIN = 0;
-  private static final int MANAGER_LOGIN = 1;
-  private static final int CLIENT_LOGIN = 2;
-  private static final int EXIT = 3;
+
+public class Loginstate extends WareState implements ActionListener
+{
+  private static Loginstate instance;
+ 
+  private JFrame frame;
+  private AbstractButton clientButton, exitButton, clerkButton, managerButton;
+
   private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));  
   private UserInterface context;
-  private static Loginstate instance;
-  private Loginstate() {
+  
+  private Loginstate() 
+  {
       super();
   }
 
-  public static Loginstate instance() {
-    if (instance == null) {
+  public static Loginstate instance() 
+  {
+    if (instance == null) 
+	{
       instance = new Loginstate();
     }
     return instance;
   }
-
-  public int getCommand() {
-    do {
-      try {
-        int value = Integer.parseInt(getToken("Enter command:" ));
-        if (value <= EXIT && value >= CLERK_LOGIN) {
-          return value;
-        }
-      } catch (NumberFormatException nfe) {
-        System.out.println("Enter a number");
-      }
-    } while (true);
+  
+   public void actionPerformed(ActionEvent event) 
+   {
+      if (event.getSource().equals(this.clientButton))
+        this.client();
+      else if (event.getSource().equals(this.exitButton))
+        (UserInterface.instance()).changeState(3);
+      else if (event.getSource().equals(this.clerkButton))
+        this.clerk();
+      else if (event.getSource().equals(this.managerButton))
+        this.manager();
+   }
+	
+  public void clear() 
+  { 
+    // clean up stuff
+    frame.getContentPane().removeAll();
+    frame.paint(frame.getGraphics());
   }
 
-  public String getToken(String prompt) {
-    do {
-      try {
+  public String getToken(String prompt) 
+  {
+    do 
+	{
+      try 
+	  {
         System.out.println(prompt);
         String line = reader.readLine();
         StringTokenizer tokenizer = new StringTokenizer(line,"\n\r\f");
-        if (tokenizer.hasMoreTokens()) {
+        if (tokenizer.hasMoreTokens()) 
+		{
           return tokenizer.nextToken();
         }
-      } catch (IOException ioe) {
+      } 
+	  catch (IOException ioe) 
+	  {
         System.exit(0);
       }
-    } while (true);
+    } 
+	while (true);
   }
  
-  private boolean yesOrNo(String prompt) {
+  private boolean yesOrNo(String prompt) 
+  {
     String more = getToken(prompt + " (Y|y)[es] or anything else for no");
-    if (more.charAt(0) != 'y' && more.charAt(0) != 'Y') {
+    if (more.charAt(0) != 'y' && more.charAt(0) != 'Y') 
+	{
       return false;
     }
     return true;
   }
 
-  private void clerk(){
+  private void clerk()
+  {
     (UserInterface.instance()).setLogin(UserInterface.IsClerk);
     (UserInterface.instance()).changeState(0);
   }
   
-  private void manager(){
+  private void manager()
+  {
     (UserInterface.instance()).setLogin(UserInterface.IsManager);
     (UserInterface.instance()).changeState(1);
   }
 
-  private void client(){
-    String clientID = getToken("Please input the client id: ");
-    if (Warehouse.instance().searchClientship(clientID) != null){
-      (UserInterface.instance()).setLogin(UserInterface.IsClient);
-      (UserInterface.instance()).setClient(clientID);      
-      (UserInterface.instance()).changeState(2);
-    }
-    else 
-      System.out.println("Invalid client id.");
-  } 
-
-  public void process() {
-    int command;
-    System.out.println("Successfully loaded into the LOGIN STATE\n"+
-						"Please input 0 to login as Clerk\n"+ 
-                        "input 1 to login as Manager\n" +
-						"input 2 to login as Client\n" +
-                        "input 3 to exit the System\n");     
-    while ((command = getCommand()) != EXIT) {
-
-      switch (command) {
-        case CLERK_LOGIN:       clerk();
-                                break;
-        case MANAGER_LOGIN:     manager();
-                                break;
-		case CLIENT_LOGIN:       client();
-                                break;
-        default:                System.out.println("Invalid choice");
-                                
-      }
-      System.out.println("Please input 0 to login as Clerk\n"+ 
-                        "input 1 to login as Manager\n" +
-						"input 2 to login as Client\n" +
-                        "input 3 to exit the system\n"); 
-    }
-    (UserInterface.instance()).changeState(3);
+  private void client()
+  {
+    String clientID = JOptionPane.showInputDialog(frame, "Please enter the client ID: ");
+        if (Warehouse.instance().searchClientship(clientID) != null) 
+		{
+           (UserInterface.instance()).setLogin(UserInterface.IsClient);
+           (UserInterface.instance()).setClient(clientID);
+           clear();
+           (UserInterface.instance()).changeState(2);
+        } 
+		  else 
+		  {
+            JOptionPane.showMessageDialog(frame, "Invalid client id.");
+          }
+  }
+  
+  public void run() 
+  {
+    frame = UserInterface.instance().getFrame();
+    frame.getContentPane().removeAll();
+    frame.getContentPane().setLayout(new FlowLayout());
+    clientButton = new JButton("Client");
+    clerkButton = new JButton("Clerk");
+    managerButton = new JButton("Manager");
+    exitButton = new JButton("Exit");
+    clientButton.addActionListener(this);
+    clerkButton.addActionListener(this);
+    managerButton.addActionListener(this);
+    exitButton.addActionListener(this);
+    frame.getContentPane().add(this.clientButton);
+    frame.getContentPane().add(this.clerkButton);
+    frame.getContentPane().add(this.managerButton);
+    frame.getContentPane().add(this.exitButton);
+    frame.setVisible(true);
+    frame.paint(frame.getGraphics());
+    // frame.repaint();
+    frame.toFront();
+    frame.requestFocus();
   }
 
-  public void run() {
-    process();
-  }
 }
